@@ -5,11 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Photo Editor</title>
   <style>
+    :root {
+      --canvas-cream: #e8e4d9;
+      --ink-black: #121212;
+      --dark-bg: #1a1a1a;
+      --glass-smoke: rgba(45, 45, 45, 0.7);
+      --accent: #e94560;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      background: var(--dark-bg);
       font-family: Arial, sans-serif;
       color: white;
       display: flex;
@@ -19,54 +27,44 @@
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin-bottom: 20px;
-      background: linear-gradient(90deg, #e94560, #a855f7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 2px;
+      color: var(--canvas-cream);
+      letter-spacing: 4px;
+      font-weight: 300;
     }
 
     #upload-area {
       width: 100%;
       max-width: 700px;
       min-height: 300px;
-      border: 2px dashed rgba(255,255,255,0.3);
-      border-radius: 20px;
+      border: 2px dashed var(--ink-black);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
+      background: var(--canvas-cream);
+      color: var(--ink-black);
       transition: 0.3s;
       margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
     }
 
-    #upload-area:hover {
-      border-color: #e94560;
-      background: rgba(255,255,255,0.08);
-    }
+    #upload-area:hover { opacity: 0.85; }
 
-    #upload-area p {
-      color: rgba(255,255,255,0.5);
-      font-size: 1.1rem;
-    }
+    #upload-area p { font-size: 1rem; color: var(--ink-black); }
 
     #canvas {
       max-width: 100%;
-      border-radius: 16px;
+      border-radius: 12px;
       display: none;
     }
 
-    /* SLIDER PANEL */
     .slider-panel {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
       padding: 15px 20px;
       width: 100%;
       max-width: 700px;
@@ -84,27 +82,26 @@
     .slider-row label {
       width: 100px;
       font-size: 13px;
-      color: rgba(255,255,255,0.7);
+      color: rgba(255,255,255,0.6);
     }
 
     .slider-row input[type="range"] {
       flex: 1;
-      accent-color: #e94560;
+      accent-color: var(--accent);
     }
 
     .slider-row span {
       width: 45px;
       font-size: 13px;
-      color: #e94560;
+      color: var(--canvas-cream);
       text-align: right;
     }
 
-    /* TEXT PANEL */
     .text-panel {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
       padding: 15px 20px;
       width: 100%;
       max-width: 700px;
@@ -120,8 +117,8 @@
       min-width: 150px;
       padding: 8px 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08);
       color: white;
       font-size: 14px;
     }
@@ -129,8 +126,8 @@
     .text-panel select {
       padding: 8px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08);
       color: white;
       font-size: 14px;
     }
@@ -148,21 +145,21 @@
       padding: 8px 16px;
       border-radius: 8px;
       border: none;
-      background: linear-gradient(135deg, #e94560, #a855f7);
-      color: white;
+      background: var(--canvas-cream);
+      color: var(--ink-black);
       cursor: pointer;
       font-size: 14px;
+      font-weight: bold;
       transition: 0.3s;
     }
 
     .panel-btn:hover { opacity: 0.8; }
 
-    /* AI RESULT */
     #ai-result {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(168,85,247,0.4);
-      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
       padding: 15px 20px;
       width: 100%;
       max-width: 700px;
@@ -170,18 +167,44 @@
       display: none;
       line-height: 1.7;
       font-size: 14px;
-      color: rgba(255,255,255,0.85);
+      color: rgba(255,255,255,0.8);
     }
 
-    /* BOTTOM TOOLBAR */
+    .filter-row {
+      display: none;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 15px;
+    }
+
+    .filter-chip {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: var(--canvas-cream);
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.3s;
+    }
+
+    .filter-chip:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: var(--canvas-cream);
+    }
+
+    /* ALT TOOLBAR */
     .toolbar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(15, 12, 41, 0.7);
-      backdrop-filter: blur(30px);
-      border-top: 1px solid rgba(255,255,255,0.1);
+      background: var(--glass-smoke);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       justify-content: space-around;
       align-items: center;
@@ -196,56 +219,25 @@
       gap: 4px;
       background: none;
       border: none;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.4);
       cursor: pointer;
       font-size: 11px;
       transition: 0.3s;
       padding: 6px 12px;
-      border-radius: 12px;
+      border-radius: 10px;
     }
 
     .tool-btn:hover, .tool-btn.active {
-      color: #e94560;
-      background: rgba(233,69,96,0.1);
+      color: var(--canvas-cream);
+      background: rgba(255,255,255,0.06);
     }
 
-    .tool-btn .icon {
-      font-size: 22px;
-    }
-
-    /* FILTER BUTTONS */
-    .filter-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 15px;
-      display: none;
-    }
-
-    .filter-chip {
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
-      color: white;
-      cursor: pointer;
-      font-size: 13px;
-      transition: 0.3s;
-    }
-
-    .filter-chip:hover {
-      background: rgba(233,69,96,0.3);
-      border-color: #e94560;
-    }
+    .tool-btn .icon { font-size: 20px; }
   </style>
 </head>
 <body>
 
-  <h1>✦ Photo Editor</h1>
+  <h1>PHOTO EDITOR</h1>
 
   <div id="upload-area" onclick="document.getElementById('file-input').click()">
     <p>📷 Fotoğraf yüklemek için tıkla</p>
@@ -253,29 +245,26 @@
   <input type="file" id="file-input" accept="image/*" style="display:none">
   <canvas id="canvas"></canvas>
 
-  <!-- Filtre Çipleri -->
   <div class="filter-row" id="filter-row">
-    <button class="filter-chip" onclick="applyFilter('grayscale')">⚫ Siyah-Beyaz</button>
-    <button class="filter-chip" onclick="applyFilter('sepia')">🟤 Sepya</button>
-    <button class="filter-chip" onclick="applyFilter('invert')">🔄 Negatif</button>
-    <button class="filter-chip" onclick="resetFilter()">✨ Sıfırla</button>
+    <button class="filter-chip" onclick="applyFilter('grayscale')">Siyah-Beyaz</button>
+    <button class="filter-chip" onclick="applyFilter('sepia')">Sepya</button>
+    <button class="filter-chip" onclick="applyFilter('invert')">Negatif</button>
+    <button class="filter-chip" onclick="resetFilter()">Sıfırla</button>
   </div>
 
-  <!-- Slider Paneli -->
   <div class="slider-panel" id="slider-panel">
     <div class="slider-row">
-      <label>☀️ Parlaklık</label>
+      <label>Parlaklık</label>
       <input type="range" id="brightness" min="0" max="200" value="100" oninput="applySliders()">
       <span id="brightness-val">100%</span>
     </div>
     <div class="slider-row">
-      <label>🎚️ Kontrast</label>
+      <label>Kontrast</label>
       <input type="range" id="contrast" min="0" max="200" value="100" oninput="applySliders()">
       <span id="contrast-val">100%</span>
     </div>
   </div>
 
-  <!-- Metin Paneli -->
   <div class="text-panel" id="text-panel">
     <input type="text" id="text-input" placeholder="Metin yaz...">
     <select id="font-size">
@@ -287,10 +276,8 @@
     <button class="panel-btn" onclick="addText()">Ekle</button>
   </div>
 
-  <!-- AI Sonucu -->
   <div id="ai-result"></div>
 
-  <!-- Alt Toolbar -->
   <div class="toolbar">
     <button class="tool-btn" onclick="document.getElementById('file-input').click()">
       <span class="icon">📁</span> Yükle
@@ -303,9 +290,6 @@
     </button>
     <button class="tool-btn" id="btn-text" onclick="togglePanel('text')">
       <span class="icon">✏️</span> Metin
-    </button>
-    <button class="tool-btn" id="btn-ai" onclick="analyzePhoto()">
-      <span class="icon">🤖</span> AI
     </button>
     <button class="tool-btn" onclick="downloadImage()">
       <span class="icon">💾</span> İndir
@@ -329,7 +313,6 @@
           ctx.drawImage(img, 0, 0);
           canvas.style.display = 'block';
           uploadArea.style.display = 'none';
-          document.getElementById('filter-row').style.display = 'flex';
         }
         img.src = event.target.result;
       }
@@ -341,8 +324,7 @@
       const sliderPanel = document.getElementById('slider-panel');
       const textPanel = document.getElementById('text-panel');
 
-      const btns = document.querySelectorAll('.tool-btn');
-      btns.forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
 
       if (panel === 'filter') {
         sliderPanel.style.display = 'none';
@@ -420,48 +402,6 @@
       pendingText = text;
       canvas.style.cursor = 'crosshair';
       alert('Fotoğrafın üzerine tıkla!');
-    }
-
-    function getApiKey() {
-      let key = sessionStorage.getItem('anthropic_key');
-      if (!key) {
-        key = prompt('Anthropic API Key\'ini gir:');
-        if (key) sessionStorage.setItem('anthropic_key', key);
-      }
-      return key;
-    }
-
-    async function analyzePhoto() {
-      if (!canvas.width) { alert('Önce bir fotoğraf yükle!'); return; }
-      const aiResult = document.getElementById('ai-result');
-      aiResult.style.display = 'block';
-      aiResult.textContent = '🤖 Analiz ediliyor...';
-      const imageData = canvas.toDataURL('image/jpeg').split(',')[1];
-      try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': getApiKey(),
-            'anthropic-version': '2023-06-01'
-          },
-          body: JSON.stringify({
-            model: 'claude-opus-4-6',
-            max_tokens: 1024,
-            messages: [{
-              role: 'user',
-              content: [
-                { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageData } },
-                { type: 'text', text: 'Bu fotoğrafı Türkçe olarak analiz et. Ne görüyorsun, renkler nasıl, genel atmosfer nedir?' }
-              ]
-            }]
-          })
-        });
-        const data = await response.json();
-        aiResult.textContent = data.content[0].text;
-      } catch (error) {
-        aiResult.textContent = 'Hata oluştu: ' + error.message;
-      }
     }
   </script>
 
