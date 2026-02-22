@@ -3,407 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Photo Editor</title>
+  <title>Neural Lab | Studio Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;900&family=Playfair+Display:ital,wght@1,400&family=Outfit:wght@100;400;800&family=Space+Mono&display=swap" rel="stylesheet">
+  
   <style>
-    :root {
-      --canvas-cream: #e8e4d9;
-      --ink-black: #121212;
-      --dark-bg: #1a1a1a;
-      --glass-smoke: rgba(45, 45, 45, 0.7);
-      --accent: #e94560;
-    }
+    :root { --bg: #050505; --panel: #0d0d0d; --accent: #e8e4d9; --border: rgba(255,255,255,0.05); --gold: #c5a059; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: var(--accent); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    header { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; border-bottom: 1px solid var(--border); }
+    .logo { font-size: 11px; letter-spacing: 6px; text-transform: uppercase; font-weight: 300; }
+    
+    /* Dil Değiştirici Stil */
+    .lang-switcher { font-size: 9px; letter-spacing: 2px; cursor: pointer; opacity: 0.5; transition: 0.3s; margin-right: 20px; text-transform: uppercase; }
+    .lang-switcher:hover { opacity: 1; color: var(--gold); }
 
-    body {
-      min-height: 100vh;
-      background: var(--dark-bg);
-      font-family: Arial, sans-serif;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 20px 120px 20px;
-    }
+    #main { flex: 1; display: flex; overflow: hidden; }
+    #stage { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 40px; background: #000; }
+    canvas { max-width: 100%; max-height: 100%; box-shadow: 0 40px 100px rgba(0,0,0,0.9); }
 
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      color: var(--canvas-cream);
-      letter-spacing: 4px;
-      font-weight: 300;
-    }
-
-    #upload-area {
-      width: 100%;
-      max-width: 700px;
-      min-height: 300px;
-      border: 2px dashed var(--ink-black);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: var(--canvas-cream);
-      color: var(--ink-black);
-      transition: 0.3s;
-      margin-bottom: 20px;
-    }
-
-    #upload-area:hover { opacity: 0.85; }
-
-    #upload-area p { font-size: 1rem; color: var(--ink-black); }
-
-    #canvas {
-      max-width: 100%;
-      border-radius: 12px;
-      display: none;
-    }
-
-    .slider-panel {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 15px 20px;
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 15px;
-      display: none;
-    }
-
-    .slider-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .slider-row label {
-      width: 100px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.6);
-    }
-
-    .slider-row input[type="range"] {
-      flex: 1;
-      accent-color: var(--accent);
-    }
-
-    .slider-row span {
-      width: 45px;
-      font-size: 13px;
-      color: var(--canvas-cream);
-      text-align: right;
-    }
-
-    .text-panel {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 15px 20px;
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 15px;
-      display: none;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .text-panel input[type="text"] {
-      flex: 1;
-      min-width: 150px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.08);
-      color: white;
-      font-size: 14px;
-    }
-
-    .text-panel select {
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.08);
-      color: white;
-      font-size: 14px;
-    }
-
-    .text-panel input[type="color"] {
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: none;
-    }
-
-    .panel-btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: none;
-      background: var(--canvas-cream);
-      color: var(--ink-black);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      transition: 0.3s;
-    }
-
-    .panel-btn:hover { opacity: 0.8; }
-
-    #ai-result {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 15px 20px;
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 15px;
-      display: none;
-      line-height: 1.7;
-      font-size: 14px;
-      color: rgba(255,255,255,0.8);
-    }
-
-    .filter-row {
-      display: none;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 15px;
-    }
-
-    .filter-chip {
-      padding: 6px 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.06);
-      color: var(--canvas-cream);
-      cursor: pointer;
-      font-size: 13px;
-      transition: 0.3s;
-    }
-
-    .filter-chip:hover {
-      background: rgba(255,255,255,0.15);
-      border-color: var(--canvas-cream);
-    }
-
-    /* ALT TOOLBAR */
-    .toolbar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--glass-smoke);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 0 20px 0;
-      z-index: 100;
-    }
-
-    .tool-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.4);
-      cursor: pointer;
-      font-size: 11px;
-      transition: 0.3s;
-      padding: 6px 12px;
-      border-radius: 10px;
-    }
-
-    .tool-btn:hover, .tool-btn.active {
-      color: var(--canvas-cream);
-      background: rgba(255,255,255,0.06);
-    }
-
-    .tool-btn .icon { font-size: 20px; }
+    #sidebar { width: 350px; background: var(--panel); border-left: 1px solid var(--border); padding: 30px; overflow-y: auto; }
+    .sec-title { font-size: 9px; text-transform: uppercase; color: #666; margin: 25px 0 12px; letter-spacing: 2px; }
+    
+    input, select { width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 12px; font-size: 11px; margin-bottom: 12px; outline: none; }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .opt-btn { background: transparent; border: 1px solid var(--border); color: #666; padding: 12px; font-size: 9px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+    .opt-btn.active { border-color: #fff; color: #fff; }
+    .export-btn { background: var(--accent); color: #000; border: none; padding: 10px 25px; font-size: 10px; font-weight: 700; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <h1>PHOTO EDITOR</h1>
-
-  <div id="upload-area" onclick="document.getElementById('file-input').click()">
-    <p>📷 Fotoğraf yüklemek için tıkla</p>
+<header>
+  <div class="logo">Neural Lab <span style="font-weight:100; opacity:0.5;">Studio Pro</span></div>
+  <div style="display:flex; align-items:center;">
+    <span class="lang-switcher" onclick="toggleLang()" id="lang-btn">EN</span>
+    <button class="export-btn" id="btn-render" onclick="startExport()">RENDER</button>
   </div>
-  <input type="file" id="file-input" accept="image/*" style="display:none">
-  <canvas id="canvas"></canvas>
+</header>
 
-  <div class="filter-row" id="filter-row">
-    <button class="filter-chip" onclick="applyFilter('grayscale')">Siyah-Beyaz</button>
-    <button class="filter-chip" onclick="applyFilter('sepia')">Sepya</button>
-    <button class="filter-chip" onclick="applyFilter('invert')">Negatif</button>
-    <button class="filter-chip" onclick="resetFilter()">Sıfırla</button>
-  </div>
-
-  <div class="slider-panel" id="slider-panel">
-    <div class="slider-row">
-      <label>Parlaklık</label>
-      <input type="range" id="brightness" min="0" max="200" value="100" oninput="applySliders()">
-      <span id="brightness-val">100%</span>
+<div id="main">
+  <div id="stage">
+    <div id="ui-init">
+        <button class="opt-btn" id="btn-import" onclick="document.getElementById('file-in').click()" style="padding:20px 40px;">IMPORT SOURCE</button>
     </div>
-    <div class="slider-row">
-      <label>Kontrast</label>
-      <input type="range" id="contrast" min="0" max="200" value="100" oninput="applySliders()">
-      <span id="contrast-val">100%</span>
+    <canvas id="c"></canvas>
+  </div>
+
+  <aside id="sidebar">
+    <div class="sec-title" id="title-typo">Typography</div>
+    <input type="text" id="txt-val" placeholder="..." oninput="draw()">
+    
+    <div class="sec-title" id="title-fx">Cinematic Textures</div>
+    <div class="btn-grid">
+        <button class="opt-btn active" data-key="clean" onclick="setFX('none', this)">Clean</button>
+        <button class="opt-btn" data-key="bloom" onclick="setFX('bloom', this)">Soft Bloom</button>
+        <button class="opt-btn" data-key="grain" onclick="setFX('grain', this)">35mm Grain</button>
+        <button class="opt-btn" data-key="letterbox" onclick="setFX('letterbox', this)">Letterbox</button>
     </div>
-  </div>
 
-  <div class="text-panel" id="text-panel">
-    <input type="text" id="text-input" placeholder="Metin yaz...">
-    <select id="font-size">
-      <option value="20">Küçük</option>
-      <option value="36" selected>Orta</option>
-      <option value="56">Büyük</option>
-    </select>
-    <input type="color" id="text-color" value="#ffffff">
-    <button class="panel-btn" onclick="addText()">Ekle</button>
-  </div>
+    <div class="sec-title" id="title-color">Color Grading</div>
+    <div class="btn-grid">
+        <button class="opt-btn" data-key="muted" onclick="setGrade('muted', this)">Muted</button>
+        <button class="opt-btn" data-key="deep" onclick="setGrade('deep', this)">Deep OLED</button>
+    </div>
+  </aside>
+</div>
 
-  <div id="ai-result"></div>
+<input type="file" id="file-in" style="display:none" accept="video/*,image/*">
+<video id="v-hidden" loop style="display:none"></video>
 
-  <div class="toolbar">
-    <button class="tool-btn" onclick="document.getElementById('file-input').click()">
-      <span class="icon">📁</span> Yükle
-    </button>
-    <button class="tool-btn" id="btn-filter" onclick="togglePanel('filter')">
-      <span class="icon">🎨</span> Filtre
-    </button>
-    <button class="tool-btn" id="btn-adjust" onclick="togglePanel('adjust')">
-      <span class="icon">🎚️</span> Ayar
-    </button>
-    <button class="tool-btn" id="btn-text" onclick="togglePanel('text')">
-      <span class="icon">✏️</span> Metin
-    </button>
-    <button class="tool-btn" onclick="downloadImage()">
-      <span class="icon">💾</span> İndir
-    </button>
-  </div>
+<script>
+  let currentLang = 'TR';
+  const translations = {
+    TR: {
+      render: "DIŞA AKTAR",
+      import: "DOSYA YÜKLE",
+      typo: "TİPOGRAFİ",
+      fx: "SİNEMATİK DOKULAR",
+      color: "RENK AYARI",
+      clean: "TEMİZ",
+      bloom: "YUMUŞAK IŞIK",
+      grain: "FİLM GRENİ",
+      letterbox: "SİNEMASKOP",
+      muted: "SOLGUN",
+      deep: "DERİN SİYAH",
+      placeholder: "Yazı ekle..."
+    },
+    EN: {
+      render: "EXPORT",
+      import: "IMPORT SOURCE",
+      typo: "TYPOGRAPHY",
+      fx: "CINEMATIC TEXTURES",
+      color: "COLOR GRADING",
+      clean: "CLEAN",
+      bloom: "SOFT BLOOM",
+      grain: "35MM GRAIN",
+      letterbox: "LETTERBOX",
+      muted: "MUTED",
+      deep: "DEEP OLED",
+      placeholder: "Add text..."
+    }
+  };
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const fileInput = document.getElementById('file-input');
-    const uploadArea = document.getElementById('upload-area');
+  function toggleLang() {
+    currentLang = currentLang === 'TR' ? 'EN' : 'TR';
+    document.getElementById('lang-btn').innerText = currentLang === 'TR' ? 'EN' : 'TR';
+    updateLanguage();
+  }
 
-    fileInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const img = new Image();
-        img.onload = function() {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          canvas.style.display = 'block';
-          uploadArea.style.display = 'none';
-        }
-        img.src = event.target.result;
-      }
-      reader.readAsDataURL(file);
+  function updateLanguage() {
+    const t = translations[currentLang];
+    document.getElementById('btn-render').innerText = t.render;
+    document.getElementById('btn-import').innerText = t.import;
+    document.getElementById('title-typo').innerText = t.typo;
+    document.getElementById('title-fx').innerText = t.fx;
+    document.getElementById('title-color').innerText = t.color;
+    document.getElementById('txt-val').placeholder = t.placeholder;
+    
+    // Buton metinlerini güncelle
+    document.querySelectorAll('.opt-btn[data-key]').forEach(btn => {
+      btn.innerText = t[btn.getAttribute('data-key')];
     });
+  }
 
-    function togglePanel(panel) {
-      const filterRow = document.getElementById('filter-row');
-      const sliderPanel = document.getElementById('slider-panel');
-      const textPanel = document.getElementById('text-panel');
+  // --- Buradan aşağısı önceki render kodlarının aynısıdır ---
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const video = document.getElementById('v-hidden');
+  let currentFX = 'none', currentGrade = 'none';
 
-      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('file-in').onchange = (e) => {
+    const file = e.target.files[0];
+    video.src = URL.createObjectURL(file);
+    video.onloadedmetadata = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        document.getElementById('ui-init').style.display = 'none';
+        video.play();
+        render();
+    };
+  };
 
-      if (panel === 'filter') {
-        sliderPanel.style.display = 'none';
-        textPanel.style.display = 'none';
-        filterRow.style.display = filterRow.style.display === 'flex' ? 'none' : 'flex';
-        document.getElementById('btn-filter').classList.toggle('active');
-      } else if (panel === 'adjust') {
-        filterRow.style.display = 'none';
-        textPanel.style.display = 'none';
-        sliderPanel.style.display = sliderPanel.style.display === 'block' ? 'none' : 'block';
-        document.getElementById('btn-adjust').classList.toggle('active');
-      } else if (panel === 'text') {
-        filterRow.style.display = 'none';
-        sliderPanel.style.display = 'none';
-        textPanel.style.display = textPanel.style.display === 'flex' ? 'none' : 'flex';
-        document.getElementById('btn-text').classList.toggle('active');
-      }
+  function setFX(fx, btn) {
+    currentFX = fx;
+    btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function setGrade(gr, btn) {
+    currentGrade = gr;
+    btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function render() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(currentGrade === 'deep') ctx.filter = 'contrast(1.2) brightness(0.8)';
+    else if(currentGrade === 'muted') ctx.filter = 'saturate(0.5)';
+    else ctx.filter = 'none';
+    
+    ctx.drawImage(video, 0, 0);
+
+    if(currentFX === 'grain') {
+        ctx.fillStyle = "rgba(255,255,255,0.05)";
+        for(let i=0; i<500; i++) ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1, 1);
     }
-
-    function applyFilter(filter) {
-      if (filter === 'grayscale') canvas.style.filter = 'grayscale(100%)';
-      if (filter === 'sepia') canvas.style.filter = 'sepia(100%)';
-      if (filter === 'invert') canvas.style.filter = 'invert(100%)';
+    
+    const txt = document.getElementById('txt-val').value;
+    if(txt) {
+        ctx.font = `300 ${canvas.width/20}px 'Inter'`;
+        ctx.fillStyle = "white"; ctx.textAlign = "center";
+        ctx.fillText(txt.toUpperCase(), canvas.width/2, canvas.height * 0.9);
     }
-
-    function resetFilter() {
-      canvas.style.filter = 'none';
-      document.getElementById('brightness').value = 100;
-      document.getElementById('contrast').value = 100;
-      document.getElementById('brightness-val').textContent = '100%';
-      document.getElementById('contrast-val').textContent = '100%';
-    }
-
-    function applySliders() {
-      const brightness = document.getElementById('brightness').value;
-      const contrast = document.getElementById('contrast').value;
-      document.getElementById('brightness-val').textContent = brightness + '%';
-      document.getElementById('contrast-val').textContent = contrast + '%';
-      canvas.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
-    }
-
-    function downloadImage() {
-      if (!canvas.width) { alert('Önce bir fotoğraf yükle!'); return; }
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-      tempCtx.filter = canvas.style.filter;
-      tempCtx.drawImage(canvas, 0, 0);
-      const link = document.createElement('a');
-      link.download = 'edited-photo.png';
-      link.href = tempCanvas.toDataURL();
-      link.click();
-    }
-
-    let pendingText = null;
-
-    canvas.addEventListener('click', function(e) {
-      if (!pendingText) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-      const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-      const fontSize = document.getElementById('font-size').value;
-      const color = document.getElementById('text-color').value;
-      ctx.font = `${fontSize}px Arial`;
-      ctx.fillStyle = color;
-      ctx.fillText(pendingText, x, y);
-      pendingText = null;
-      canvas.style.cursor = 'default';
-    });
-
-    function addText() {
-      const text = document.getElementById('text-input').value;
-      if (!text) { alert('Önce bir metin yaz!'); return; }
-      pendingText = text;
-      canvas.style.cursor = 'crosshair';
-      alert('Fotoğrafın üzerine tıkla!');
-    }
-  </script>
-
+    requestAnimationFrame(render);
+  }
+</script>
 </body>
 </html>
